@@ -4,6 +4,10 @@ import cv2 as cv
 recordings = ["nagranie.dav", "nagranie2.dav"]
 # recordings=["short_test.avi"]
 
+# TODO: fill these vars
+mtx = None
+dist = None
+
 if __name__ == "__main__":
     for recording in recordings:
         # save undistorted video
@@ -28,16 +32,12 @@ if __name__ == "__main__":
         for k in calibration_data.keys():
             exec(f"{k}=calibration_data['{k}']")
 
-        newcameramtx, roi = cv.getOptimalNewCameraMatrix(
-            mtx, dist, (ww, hh), 1, (ww, hh)
-        )
+        newcameramtx, roi = cv.getOptimalNewCameraMatrix(mtx, dist, (ww, hh), 1, (ww, hh))
         i = 0
         while capturer.isOpened():
             ret, frame = capturer.read()
             if ret:
-                mapx, mapy = cv.initUndistortRectifyMap(
-                    mtx, dist, None, newcameramtx, (ww, hh), 5
-                )
+                mapx, mapy = cv.initUndistortRectifyMap(mtx, dist, None, newcameramtx, (ww, hh), 5)
                 undistorted_frame = cv.remap(frame, mapx, mapy, cv.INTER_LINEAR)
                 # undistorted_frame = cv.undistort(frame, mtx, dist, None, newcameramtx)
                 x, y, w, h = roi
