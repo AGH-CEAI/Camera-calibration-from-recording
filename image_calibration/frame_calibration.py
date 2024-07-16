@@ -23,7 +23,7 @@ def main():
 
     used_imgs_cnt = 0
     for cnt, path in enumerate(imgs_paths):
-        print(f"> Processing image {cnt}/{len(imgs_paths)}: {path}")
+        print(f"> Processing image {cnt+1:02d}/{len(imgs_paths)}: {path}")
         img = cv2.imread(str(path))
 
         if img is None:
@@ -65,6 +65,13 @@ def main():
         world_points, image_points, img_gray.shape[::-1], None, None
     )
     print("> Calculated camera parameters")
+
+    error = calculate_reprojection_error(world_points, image_points, rvecs, tvecs, mtx, dist)
+    print(f"{'':>8s}> Total re-projection error: {error/len(world_points):0.6f}")
+    print(
+        f"{'':>8s}> (TIP: The closer the re-projection error is to zero, the more accurate the parameters are)"
+    )
+
     if args.verbose:
         print(
             f"> Calibration params: \n  mtx={mtx}\n  dist={dist}\n  rvecs={rvecs}\n  tvecs={tvecs}"
@@ -154,6 +161,7 @@ def is_any_checkboard_corner_near_corner(
     corners: cv2.typing.MatLike,
     calib_point_threshold: float,
 ) -> bool:
+    # TODO: rewrite these indexes in more meaningful way
     threshold = calib_point_threshold
     return (
         is_in_threshold_range(corners[0, 0, :].reshape(2), img_gray.shape, threshold)
@@ -170,6 +178,7 @@ def is_any_checkboard_corner_near_corner(
 
 
 def is_in_threshold_range(point: np.array, shape: np.array, calib_point_threshold: float) -> bool:
+    # TODO: rewrite these indexes in more meaningful way
     dist = []
     corners = np.array([[0, 0], [0, shape[0]], [shape[1], 0], [shape[1], shape[0]]])
     for corner in corners:
@@ -177,6 +186,17 @@ def is_in_threshold_range(point: np.array, shape: np.array, calib_point_threshol
 
     threshold = np.sqrt(shape[0] ** 2 + shape[1] ** 2) * calib_point_threshold
     return any(d < threshold for d in dist)
+
+
+def calculate_reprojection_error(
+    world_points: list, img_points: list, rvecs, tvecs, mtx, dist
+) -> float:
+    mean_error = 0.0
+    for i in range(len(world_points)):
+        imgpoints2, _ = cv2.projectPoints(world_points[i], rvecs[i], tvecs[i], mtx, dist)
+        error = cv2.norm(img_points[i], imgpoints2, cv2.NORM_L2) / len(imgpoints2)
+        mean_error += error
+    return mean_error
 
 
 if __name__ == "__main__":
