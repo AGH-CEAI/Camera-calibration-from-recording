@@ -15,9 +15,7 @@ def main():
 
     # prepare object points, like (0,0,0), (1,0,0), (2,0,0) ....,(6,5,0)
     objp = np.zeros((checkerboard_grid[0] * checkerboard_grid[1], 3), np.float32)
-    objp[:, :2] = np.mgrid[
-        0 : checkerboard_grid[0], 0 : checkerboard_grid[1]
-    ].T.reshape(-1, 2)
+    objp[:, :2] = np.mgrid[0 : checkerboard_grid[0], 0 : checkerboard_grid[1]].T.reshape(-1, 2)
 
     # Arrays to store object points and image points from all the images.
     world_points = []  # 3d point in real world space
@@ -32,9 +30,7 @@ def main():
             raise ValueError(f"Image '{path}' is None")
 
         img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        checkboard_found, raw_corners = cv2.findChessboardCorners(
-            img_gray, checkerboard_grid, None
-        )
+        checkboard_found, raw_corners = cv2.findChessboardCorners(img_gray, checkerboard_grid, None)
 
         if not checkboard_found:
             msg = "ERR: Missing points"
@@ -43,18 +39,14 @@ def main():
 
         else:
             used_imgs_cnt += 1
-            corners = cv2.cornerSubPix(
-                img_gray, raw_corners, (11, 11), (-1, -1), criteria
-            )
+            corners = cv2.cornerSubPix(img_gray, raw_corners, (11, 11), (-1, -1), criteria)
 
             if is_any_checkboard_corner_near_corner(
                 checkerboard_grid, img_gray, corners, args.threshold
             ):
                 world_points.append(objp)
                 image_points.append(corners)
-                cv2.drawChessboardCorners(
-                    img, checkerboard_grid, corners, checkboard_found
-                )
+                cv2.drawChessboardCorners(img, checkerboard_grid, corners, checkboard_found)
 
             else:
                 msg = "ERR: Checkerboard is too far from corners"
@@ -72,9 +64,11 @@ def main():
     _, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(
         world_points, image_points, img_gray.shape[::-1], None, None
     )
-    print(f"> Calculated camera parameters")
+    print("> Calculated camera parameters")
     if args.verbose:
-        print(f"> Calibration params: \n  mtx={mtx}\n  dist={dist}\n  rvecs={rvecs}\n  tvecs={tvecs}")
+        print(
+            f"> Calibration params: \n  mtx={mtx}\n  dist={dist}\n  rvecs={rvecs}\n  tvecs={tvecs}"
+        )
 
     np.savez(
         args.output_file,
@@ -96,9 +90,7 @@ def parse_args():
         type=Path,
         required=True,
     )
-    parser.add_argument(
-        "--image-format", help="Image format extension", default="jpg", type=str
-    )
+    parser.add_argument("--image-format", help="Image format extension", default="jpg", type=str)
     parser.add_argument(
         "-o",
         "--output-file",
@@ -114,9 +106,7 @@ def parse_args():
         required=True,
         default=0.2,
     )
-    parser.add_argument(
-        "-v", "--verbose", help="Show calibration video", action="store_true"
-    )
+    parser.add_argument("-v", "--verbose", help="Show calibration video", action="store_true")
 
     parser.add_argument(
         "--grid",
@@ -130,7 +120,7 @@ def parse_args():
     args = parser.parse_args()
     args.checkerboard_grid = tuple(args.grid)
     args.img_format = args.image_format
-    
+
     if args.output_file is None:
         args.output_file = args.input_folder.with_name("calibration.npz")
     else:
@@ -175,15 +165,11 @@ def is_any_checkboard_corner_near_corner(
         or is_in_threshold_range(
             corners[-checkerboard_grid[0], 0, :].reshape(2), img_gray.shape, threshold
         )
-        or is_in_threshold_range(
-            corners[-1, 0, :].reshape(2), img_gray.shape, threshold
-        )
+        or is_in_threshold_range(corners[-1, 0, :].reshape(2), img_gray.shape, threshold)
     )
 
 
-def is_in_threshold_range(
-    point: np.array, shape: np.array, calib_point_threshold: float
-) -> bool:
+def is_in_threshold_range(point: np.array, shape: np.array, calib_point_threshold: float) -> bool:
     dist = []
     corners = np.array([[0, 0], [0, shape[0]], [shape[1], 0], [shape[1], shape[0]]])
     for corner in corners:
