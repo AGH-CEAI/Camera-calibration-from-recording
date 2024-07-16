@@ -113,7 +113,7 @@ def calculate_optimal_camera_matrix(
     return cv2.getOptimalNewCameraMatrix(calibration.mtx, calibration.dist, shape, 1, shape)
 
 
-def crop_img_to_roi(img: cv2.typing.MatLike, roi: cv2.typing.Rect):
+def crop_img_to_roi(img: cv2.typing.MatLike, roi: cv2.typing.Rect) -> cv2.typing.MatLike:
     x, y, w, h = roi
     return img[y : y + h, x : x + w]
 
