@@ -28,7 +28,7 @@ def main():
     print(f"> Original image dims: {img_shape[1]}x{img_shape[0]} ({img_shape[2]} channels)")
 
     for cnt, path in enumerate(imgs_paths):
-        print(f"> Processing image {cnt+1:02d}/{len(imgs_paths)}: {path.name}")
+        print(f"> Processing image {cnt+1:02d}/{len(imgs_paths):02d}: {path.name}")
         img = cv2.imread(str(path))
 
         if img is None:
@@ -39,7 +39,7 @@ def main():
         )
         if args.crop:
             undistorted_img = crop_img_to_roi(undistorted_img, roi)
-            undistorted_img = cv2.resize(undistorted_img, (img_shape[0], img_shape[1]))
+            undistorted_img = cv2.resize(undistorted_img, (img_shape[1], img_shape[0]))
 
         out_file = args.output_dir / path.name
         cv2.imwrite(str(out_file), undistorted_img)
@@ -109,8 +109,9 @@ def get_img_shape(img_path: Path) -> tuple[int, int, int]:
 def calculate_optimal_camera_matrix(
     img_shape: np.array, calibration: Calibration
 ) -> tuple[np.array, np.array]:
-    shape = (img_shape[1] * 10, img_shape[0] * 10)
-    return cv2.getOptimalNewCameraMatrix(calibration.mtx, calibration.dist, shape, 1, shape)
+    shape = (img_shape[1], img_shape[0])
+    new_shape = (img_shape[1], img_shape[0])
+    return cv2.getOptimalNewCameraMatrix(calibration.mtx, calibration.dist, shape, 1, new_shape)
 
 
 def crop_img_to_roi(img: cv2.typing.MatLike, roi: cv2.typing.Rect) -> cv2.typing.MatLike:

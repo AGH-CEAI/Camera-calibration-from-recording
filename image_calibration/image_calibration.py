@@ -23,7 +23,7 @@ def main():
 
     used_imgs_cnt = 0
     for cnt, path in enumerate(imgs_paths):
-        print(f"> Processing image {cnt+1:02d}/{len(imgs_paths)}: {path.name}")
+        print(f"> Processing image {cnt+1:02d}/{len(imgs_paths):02d}: {path.name}")
         img = cv2.imread(str(path))
 
         if img is None:
@@ -38,7 +38,6 @@ def main():
             cv2_put_text(img, msg)
 
         else:
-            used_imgs_cnt += 1
             corners = cv2.cornerSubPix(img_gray, raw_corners, (11, 11), (-1, -1), criteria)
 
             if is_any_checkboard_corner_near_corner(
@@ -47,6 +46,7 @@ def main():
                 world_points.append(objp)
                 image_points.append(corners)
                 cv2.drawChessboardCorners(img, checkerboard_grid, corners, checkboard_found)
+                used_imgs_cnt += 1
 
             else:
                 msg = "ERR: Checkerboard is too far from corners"
@@ -60,6 +60,10 @@ def main():
     print(
         f"> Finished image analysis. Measurements are taken from {used_imgs_cnt} out of {len(imgs_paths)} images."
     )
+    if used_imgs_cnt == 0:
+        raise ValueError(
+            "None of the calibration images can be used! Try to change the threshold argument."
+        )
 
     _, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(
         world_points, image_points, img_gray.shape[::-1], None, None
