@@ -9,7 +9,7 @@ from pathlib import Path
 def main():
     args = parse_args()
 
-    imgs_paths = get_calibration_imgs_paths(args.input_folder, args.img_format)
+    imgs_paths = get_calibration_imgs_paths(args.input_dir, args.img_format)
     criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
     checkerboard_grid = args.checkerboard_grid
 
@@ -23,7 +23,7 @@ def main():
 
     used_imgs_cnt = 0
     for cnt, path in enumerate(imgs_paths):
-        print(f"> Processing image {cnt+1:02d}/{len(imgs_paths)}: {path}")
+        print(f"> Processing image {cnt+1:02d}/{len(imgs_paths)}: {path.name}")
         img = cv2.imread(str(path))
 
         if img is None:
@@ -92,7 +92,7 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "-i",
-        "--input-folder",
+        "--input-dir",
         help="Path to the folder with calibration images",
         type=Path,
         required=True,
@@ -101,7 +101,7 @@ def parse_args():
     parser.add_argument(
         "-o",
         "--output-file",
-        help="Output directory for the camera calibration",
+        help="Output path for the camera calibration file",
         type=Path,
         default=None,
     )
@@ -129,7 +129,7 @@ def parse_args():
     args.img_format = args.image_format
 
     if args.output_file is None:
-        args.output_file = args.input_folder.with_name("calibration.npz")
+        args.output_file = args.input_dir.parent / "calibration.npz"
     else:
         args.output_file = args.output_file.with_suffix(".npz")
 
