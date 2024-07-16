@@ -9,10 +9,14 @@ Original scripts by Paweł Kolendo (@NieTrawisz) dedicated for **recordings** in
 - `./image_calibration`
 Scripts for pre-processing caputered frames
 
-### Calculate camera calibration
+### Calculate calibration params
 ```bash
-./image_calibration/frame_calibration.py -i "/path/to/calibration/images/folder" --image-format "png" -t 0.2 --grid 9 6
+./image_calibration/image_calibration.py -i "path/to/calibration/images/folder" -o "output/folder" --image-format "png" -t 0.2 --grid 9 6
 ```
 Type `-h` for help.
 
 ### Apply calibration to images
+```bash
+./image_calibration/undistortion.py -i "path/to/images/folder" -c "path/to/calibration.npz" -o "output/folder" --image-format "png"
+```
+Type `-h` for help (for instance, there is an option to crop the image with `--crop` flag)
