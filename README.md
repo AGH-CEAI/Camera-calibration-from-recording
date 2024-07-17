@@ -32,6 +32,5 @@ Edit the `image_calibration/process_dataset.sh` file to your needs.
 
 ## Requirements
 ```
-numpy
 opencv-python
 ```
