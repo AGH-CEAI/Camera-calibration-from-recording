@@ -10,6 +10,9 @@ point_list = [
     [39, 180, 89],
 ]
 
+# TODO: setup this variables
+mtx, dist = None, None
+
 
 def draw_circle(event, x, y, flags, param):
     global mouseX, mouseY, point_gathered
@@ -18,8 +21,9 @@ def draw_circle(event, x, y, flags, param):
         mouseX, mouseY = x, y
         point_gathered = True
 
+
 # def worldLine2imageLine(image,mtx,dist,rvec,tvec,worldLine):
-    
+
 
 if __name__ == "__main__":
     cv2.namedWindow("image")
@@ -60,18 +64,18 @@ if __name__ == "__main__":
     ret, rvec, tvec = cv2.solvePnP(
         np.array(point_list, np.float32), np.array(img_points, np.float32), mtx, dist
     )
-    R,_=cv2.Rodrigues(rvec)
-    print(-R.T@tvec)
-    
+    R, _ = cv2.Rodrigues(rvec)
+    print(-R.T @ tvec)
+
     np.savez("extrinsics.npz", rvec=rvec, tvec=tvec)
-    
+
     # points_on_aline=np.array([[[0]*180,[i for i in range(180)],[0]*180]], np.float32)
-    
-    # points_2d, _ = cv2.projectPoints(points_on_aline, 
-    #                              rvec, tvec, 
-    #                              mtx, 
-    #                              dist) 
-    
+
+    # points_2d, _ = cv2.projectPoints(points_on_aline,
+    #                              rvec, tvec,
+    #                              mtx,
+    #                              dist)
+
     # for i in range(len(points_2d)):
     #     x,y=int(points_2d[i][0][0]),int(points_2d[i][0][1])
     #     cv2.circle(frame,(x,y),1,(255,0,0),-1)

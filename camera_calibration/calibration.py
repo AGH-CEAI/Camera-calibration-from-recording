@@ -9,22 +9,20 @@ calibration_point_threshold = 0.2
 
 
 def isInThresholdRange(point, shape):
-    dist=[]
-    corners=np.array([[0,0],[0,shape[0]],[shape[1],0],[shape[1],shape[0]]])
+    dist = []
+    corners = np.array([[0, 0], [0, shape[0]], [shape[1], 0], [shape[1], shape[0]]])
     for corner in corners:
-        dist.append(np.sqrt((point[0]-corner[0])**2+(point[1]-corner[1])**2))   
-    
-    threshold=np.sqrt(shape[0]**2+shape[1]**2)*calibration_point_threshold
+        dist.append(np.sqrt((point[0] - corner[0]) ** 2 + (point[1] - corner[1]) ** 2))
+
+    threshold = np.sqrt(shape[0] ** 2 + shape[1] ** 2) * calibration_point_threshold
     return (
         # point[1] >= shape[0] * (1 - calibration_point_threshold)
         # or point[1] < shape[0] * calibration_point_threshold
         # or point[0] >= shape[1] * (1 - calibration_point_threshold)
         # or point[0] < shape[1] * calibration_point_threshold
-        
         # point[0] >= shape[1] * (1 - calibration_point_threshold)
         # or point[0] < shape[1] * calibration_point_threshold
-        
-        any(d<threshold for d in dist)
+        any(d < threshold for d in dist)
     )
 
 
@@ -40,9 +38,7 @@ if __name__ == "__main__":
 
         # prepare object points, like (0,0,0), (1,0,0), (2,0,0) ....,(6,5,0)
         objp = np.zeros((checkerborad_grid[0] * checkerborad_grid[1], 3), np.float32)
-        objp[:, :2] = np.mgrid[
-            0 : checkerborad_grid[0], 0 : checkerborad_grid[1]
-        ].T.reshape(-1, 2)
+        objp[:, :2] = np.mgrid[0 : checkerborad_grid[0], 0 : checkerborad_grid[1]].T.reshape(-1, 2)
 
         # Arrays to store object points and image points from all the images.
         objpoints = []  # 3d point in real world space
@@ -73,10 +69,8 @@ if __name__ == "__main__":
                 ret2, corners = cv.findChessboardCorners(gray, checkerborad_grid, None)
 
                 # If found, add object points, image points (after refining them)
-                if ret2 == True:
-                    corners2 = cv.cornerSubPix(
-                        gray, corners, (11, 11), (-1, -1), criteria
-                    )
+                if ret2:
+                    corners2 = cv.cornerSubPix(gray, corners, (11, 11), (-1, -1), criteria)
 
                     if (
                         isInThresholdRange(corners2[0, 0, :].reshape(2), gray.shape)
@@ -93,10 +87,8 @@ if __name__ == "__main__":
                         imgpoints.append(corners2)
 
                         # Draw and display the corners
-                        cv.drawChessboardCorners(
-                            frame, checkerborad_grid, corners2, ret
-                        )
-                        
+                        cv.drawChessboardCorners(frame, checkerborad_grid, corners2, ret)
+
                     else:
                         cv.putText(
                             frame,
@@ -108,7 +100,7 @@ if __name__ == "__main__":
                             2,
                             cv.LINE_AA,
                         )
-                        
+
                 else:
                     cv.putText(
                         frame,
@@ -157,11 +149,9 @@ if __name__ == "__main__":
         tvecs=tvecs,
     )
 
-    shape=gray.shape
-    shape=(shape[1]*10,shape[0]*10)
-    newcameramtx, roi = cv.getOptimalNewCameraMatrix(
-        mtx, dist, shape, 1, shape
-    )
+    shape = gray.shape
+    shape = (shape[1] * 10, shape[0] * 10)
+    newcameramtx, roi = cv.getOptimalNewCameraMatrix(mtx, dist, shape, 1, shape)
 
     print("Done!")
 

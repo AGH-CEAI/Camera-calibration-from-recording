@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib
+
 matplotlib.use("tkagg")
 import matplotlib.pyplot as plt
 import cv2
@@ -13,6 +14,9 @@ point_list = [
     [39, 180, 89],
 ]
 
+# TODO: calibrate this variables
+rvec = None
+tvec = None
 
 if __name__ == "__main__":
     calibration_data = np.load("calibration.npz")
@@ -36,16 +40,18 @@ if __name__ == "__main__":
     R, _ = cv2.Rodrigues(rvec)
     camera_pos = -R.T @ tvec
     camera_points = np.array(
-        [
-            [((-1) ** i) * 10, ((-1) ** (i // 2)) * 10, ((-1) ** (i // 4)) * 20]
-            for i in range(8)
-        ],
+        [[((-1) ** i) * 10, ((-1) ** (i // 2)) * 10, ((-1) ** (i // 4)) * 20] for i in range(8)],
         np.float32,
     ).T
     world_camera_points = R.T @ (camera_points - tvec)
     for point1 in range(8):
         for point2 in range(8):
-            ax.plot3D((world_camera_points[0,point1],world_camera_points[0,point2]),(world_camera_points[1,point1],world_camera_points[1,point2]),(world_camera_points[2,point1],world_camera_points[2,point2]),"red")
+            ax.plot3D(
+                (world_camera_points[0, point1], world_camera_points[0, point2]),
+                (world_camera_points[1, point1], world_camera_points[1, point2]),
+                (world_camera_points[2, point1], world_camera_points[2, point2]),
+                "red",
+            )
     # ax.plot_surface(
     #     world_camera_points[0, :],
     #     world_camera_points[1, :],
